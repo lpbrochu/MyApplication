@@ -1,5 +1,6 @@
 package com.example.lpbrochu.myapplication;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -10,12 +11,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
-import android.webkit.WebView;
 
 import com.example.lpbrochu.myapplication.httpclient.MyHttpClient;
+import com.example.lpbrochu.myapplication.httpclient.WebkitCookieManagerProxy;
 import com.example.lpbrochu.myapplication.webview.MyWebView;
 import com.example.lpbrochu.myapplication.webview.MyWebViewClient;
 
+import java.io.IOException;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -31,10 +33,15 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                CookieManager cookieManager = CookieManager.getInstance();
+
 
                 MyHttpClient httpClient = new MyHttpClient();
-                String newReleaseJson = httpClient.get("https://play.pocketcasts.com/web/episodes/new_releases_episodes.json");
+                String newReleaseJson = null;
+                try {
+                    newReleaseJson = httpClient.get("https://play.pocketcasts.com/web/episodes/new_releases_episodes.json");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 Snackbar.make(view, "New release: " + newReleaseJson, Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
@@ -46,7 +53,20 @@ public class MainActivity extends AppCompatActivity {
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.removeAllCookie();
         webSettings.setJavaScriptEnabled(true);
+
+        initCookies(getApplicationContext());
+
         myWebView.loadUrl("https://play.pocketcasts.com/users/sign_in");
+    }
+
+    private void initCookies(Context appContext) {
+        android.webkit.CookieSyncManager.createInstance(appContext);
+        // unrelated, just make sure cookies are generally allowed
+        android.webkit.CookieManager.getInstance().setAcceptCookie(true);
+
+        // magic starts here
+        WebkitCookieManagerProxy coreCookieManager = new WebkitCookieManagerProxy(null, java.net.CookiePolicy.ACCEPT_ALL);
+        java.net.CookieHandler.setDefault(coreCookieManager);
     }
 
     @Override
