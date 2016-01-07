@@ -1,6 +1,7 @@
 package com.example.lpbrochu.myapplication;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -18,6 +19,7 @@ import com.example.lpbrochu.myapplication.webview.MyWebView;
 import com.example.lpbrochu.myapplication.webview.MyWebViewClient;
 
 import java.io.IOException;
+import java.net.URL;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -32,18 +34,24 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
 
+                new AsyncTask<Void, Void, Void>(){
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        MyHttpClient httpClient = new MyHttpClient();
+                        String newReleaseJson = null;
+                        try {
+                            newReleaseJson = httpClient.post("https://play.pocketcasts.com/web/episodes/new_releases_episodes.json");
+                            Snackbar.make(view, "New release: " + newReleaseJson, Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+                }.execute();
 
-                MyHttpClient httpClient = new MyHttpClient();
-                String newReleaseJson = null;
-                try {
-                    newReleaseJson = httpClient.get("https://play.pocketcasts.com/web/episodes/new_releases_episodes.json");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                Snackbar.make(view, "New release: " + newReleaseJson, Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
             }
         });
 
