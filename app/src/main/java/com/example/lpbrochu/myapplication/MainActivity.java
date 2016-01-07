@@ -1,6 +1,5 @@
 package com.example.lpbrochu.myapplication;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -14,15 +13,12 @@ import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 
 import com.example.lpbrochu.myapplication.httpclient.MyHttpClient;
-import com.example.lpbrochu.myapplication.httpclient.WebkitCookieManagerProxy;
 import com.example.lpbrochu.myapplication.webview.MyWebView;
 import com.example.lpbrochu.myapplication.webview.MyWebViewClient;
 
-import java.io.IOException;
-import java.net.URL;
-
 
 public class MainActivity extends AppCompatActivity {
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +32,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(final View view) {
 
-                new AsyncTask<Void, Void, Void>(){
+                new AsyncTask<Void, Void, Void>() {
                     @Override
                     protected Void doInBackground(Void... params) {
-                        MyHttpClient httpClient = new MyHttpClient();
+                        MyHttpClient httpClient = new MyHttpClient(CookieManager.getInstance());
                         String newReleaseJson = null;
                         try {
                             newReleaseJson = httpClient.post("https://play.pocketcasts.com/web/episodes/new_releases_episodes.json");
@@ -58,24 +54,13 @@ public class MainActivity extends AppCompatActivity {
         MyWebView myWebView = (MyWebView) findViewById(R.id.webView);
         myWebView.setWebViewClient(new MyWebViewClient());
         WebSettings webSettings = myWebView.getSettings();
-        CookieManager cookieManager = CookieManager.getInstance();
-        cookieManager.removeAllCookie();
+        CookieManager.getInstance().removeAllCookie();
         webSettings.setJavaScriptEnabled(true);
 
-        initCookies(getApplicationContext());
 
         myWebView.loadUrl("https://play.pocketcasts.com/users/sign_in");
     }
 
-    private void initCookies(Context appContext) {
-        android.webkit.CookieSyncManager.createInstance(appContext);
-        // unrelated, just make sure cookies are generally allowed
-        android.webkit.CookieManager.getInstance().setAcceptCookie(true);
-
-        // magic starts here
-        WebkitCookieManagerProxy coreCookieManager = new WebkitCookieManagerProxy(null, java.net.CookiePolicy.ACCEPT_ALL);
-        java.net.CookieHandler.setDefault(coreCookieManager);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
