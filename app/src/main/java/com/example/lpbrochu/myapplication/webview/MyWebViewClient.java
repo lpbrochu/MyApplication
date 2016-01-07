@@ -14,7 +14,9 @@ public class MyWebViewClient extends WebViewClient {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         Log.i("Blabla", "url: " + url);
-        return super.shouldOverrideUrlLoading(view, url);
+        if (url.equals("https://play.pocketcasts.com/web"))
+            view.destroy();
+        return false;
     }
 
     @Override

@@ -12,6 +12,7 @@ import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
+import com.example.lpbrochu.myapplication.httpclient.MyHttpClient;
 import com.example.lpbrochu.myapplication.webview.MyWebView;
 import com.example.lpbrochu.myapplication.webview.MyWebViewClient;
 
@@ -30,7 +31,11 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                CookieManager cookieManager = CookieManager.getInstance();
+
+                MyHttpClient httpClient = new MyHttpClient();
+                String newReleaseJson = httpClient.get("https://play.pocketcasts.com/web/episodes/new_releases_episodes.json");
+                Snackbar.make(view, "New release: " + newReleaseJson, Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
